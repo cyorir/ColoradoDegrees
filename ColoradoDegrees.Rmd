@@ -1,0 +1,46 @@
+---
+title: "Colorado Degrees"
+author: "Christopher Walker"
+date: "October 11, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Colorado Degrees
+
+This is an exploration of data available from the Colorado Information Marketplace. The dataset is available at:
+
+https://data.colorado.gov/Higher-Education/Degrees-Awarded-to-Post-Secondary-Graduates-in-Col/hxf8-ab6k
+
+To start with, let's look at the most recent data, for 2017. Age data is tracked.
+
+```{r read}
+library(ggplot2)
+suppressMessages(library(dplyr))
+degree_data <- read.csv("Degrees_Awarded_to_Post-Secondary_Graduates_in_Colorado.csv")
+degree_data_2017 <- degree_data %>%
+  filter(year == 2017)
+degree_ages <- summary(degree_data_2017$ageDesc)
+degree_ages <- data.frame(Count = degree_ages, age_group = names(degree_ages))
+ggplot(degree_ages, aes(x=age_group,y=Count)) + geom_bar(stat = "identity") +
+  xlab("Age group") + ggtitle("Degrees awarded per age group, 2017")
+```
+
+We can also see the number of undergraduate vs graduate degrees:
+
+```{r undergrad_grad}
+by_level_2017 <- degree_data_2017 %>% group_by(studentLevel, ageDesc) %>% summarise(Count = n())
+ggplot(by_level_2017, aes(x=ageDesc,y=Count, fill = studentLevel)) + geom_bar(stat = "identity") +
+  xlab("Age group") + ggtitle("Degrees awarded per age group, 2017")
+```
+
+The number of degrees awarded can also be viewed over time:
+
+```{r over_time}
+data_years <- degree_data %>% group_by(studentLevel, year) %>% summarise(Count = n())
+ggplot(data_years, aes(x=year,y=Count, fill = studentLevel)) + geom_bar(stat = "identity") +
+  xlab("Year") + ggtitle("Degrees awarded per year")
+```
